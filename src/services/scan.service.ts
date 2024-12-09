@@ -126,8 +126,35 @@ export interface Options {
 }
 
 /**
- * `ScanService` is a class that wraps the `scanoss.py` Docker image, providing a simplified interface
- * for configuring and executing source code scans
+ * @class ScannerService
+ * @brief A service class that manages scanning operations using the scanoss-py Docker container
+ *
+ * @details
+ * The ScannerService class provides functionality to scan repositories for:
+ * - File scanning
+ * - Dependency analysis
+ *
+ * @property {Options} options - Configuration options for the scanner
+ * @property {string} options.apiKey - API key for SCANOSS service authentication
+ * @property {string} options.apiUrl - URL endpoint for the SCANOSS service
+ * @property {boolean} options.sbomEnabled - Flag to enable SBOM generation
+ * @property {string} options.sbomFilepath - Path to store or read SBOM files
+ * @property {string} options.sbomType - Type of SBOM format to use
+ * @property {boolean} options.dependenciesEnabled - Flag to enable dependency scanning
+ * @property {string} options.outputFilepath - Path for scan results output
+ * @property {string} options.inputFilepath - Path to the repository to scan
+ * @property {string} options.runtimeContainer - Docker container image to use
+ * @property {string} options.dependencyScope - Scope for dependency scanning (prod/dev)
+ * @property {string} options.dependencyScopeExclude - Dependencies to exclude from scan
+ * @property {string} options.dependencyScopeInclude - Dependencies to include in scan
+ * @property {boolean} options.skipSnippets - Flag to skip snippet scanning
+ * @property {boolean} options.scanFiles - Flag to enable file scanning
+ * @property {boolean} options.scanossSettings - Flag to enable SCANOSS Settings
+ * @property {boolean} options.settingsFilePath - Path to settings file
+ *
+ * @throws {Error} When required configuration options are missing or invalid
+ *
+ * @author [SCANOSS]
  */
 export class ScanService {
   private options: Options;
@@ -152,6 +179,21 @@ export class ScanService {
       settingsFilePath: SETTINGS_FILE_PATH
     };
   }
+
+  /**
+   * @brief Executes the scanning process using a scanoss-py Docker container
+   * @throws {Error} When Docker command fails or configuration is invalid
+   * @returns {Promise<ScannerResults>} The results of the scanning operation
+   *
+   * @details
+   * This method performs the following operations:
+   * - Validates basic configuration
+   * - Executes Docker command
+   * - Uploads results to artifacts
+   * - Parses and returns results
+   *
+   * @note At least one scan option (scanFiles or dependenciesEnabled) must be enabled
+   */
   async scan(): Promise<{ scan: ScannerResults; stdout: string; stderr: string }> {
     // Check for basic configuration before running the docker container
     this.checkBasicConfig();
@@ -286,7 +328,7 @@ export class ScanService {
     if (!this.options.scanFiles && !this.options.dependenciesEnabled) {
       core.error(`At least one scan option should be enabled: [scanFiles, dependencyEnabled]`);
     }
-    core.info("Scan basic config is valid");
+    core.info('Basic scan config is valid');
   }
 
   /**
@@ -309,8 +351,8 @@ export class ScanService {
         return ['--settings', this.options.settingsFilePath];
       } catch (error: any) {
         if (this.options.settingsFilePath === this.DEFAULT_SETTING_FILE_PATH) return [];
-        core.warning(`SCANOSS settings file not found at '${this.options.settingsFilePath}'. Please provide a valid
-                     SCANOSS settings file path.`);
+        core.warning(`SCANOSS settings file not found at '${this.options.settingsFilePath}'.
+        Please provide a valid SCANOSS settings file path.`);
         return [];
       }
     }
