@@ -28,6 +28,14 @@ import { ScannerResults } from './result.interfaces';
 import fs from 'fs';
 import * as core from '@actions/core';
 import * as path from 'path';
+import {
+  EXECUTABLE,
+  OUTPUT_FILEPATH,
+  SCAN_FILES,
+  SCANOSS_SETTINGS,
+  SETTINGS_FILE_PATH,
+  SKIP_SNIPPETS
+} from '../app.input';
 
 const artifact = new DefaultArtifactClient();
 
@@ -95,6 +103,26 @@ export interface Options {
    * Runtime container to perform scan. Default [ghcr.io/scanoss/scanoss-py:v1.15.0]
    */
   runtimeContainer: string;
+
+  /**
+   * Skips snippet generation. Default [false]
+   */
+  skipSnippets: boolean;
+
+  /**
+   * Enables or disables file and snippet scanning. Default [true]
+   */
+  scanFiles: boolean;
+
+  /**
+   * Enables or disables SCANOSS settings. Default [false]
+   */
+  scanossSettings: boolean;
+
+  /**
+   * SCANOSS Settings file path. Default [scanoss.json]
+   */
+  settingsFilePath: string;
 }
 
 /**
@@ -103,6 +131,7 @@ export interface Options {
  */
 export class ScanService {
   private options: Options;
+  private DEFAULT_SETTING_FILE_PATH = 'scanoss.json';
   constructor(options?: Options) {
     this.options = options || {
       sbomFilepath: inputs.SBOM_FILEPATH,
@@ -116,17 +145,44 @@ export class ScanService {
       dependencyScope: inputs.DEPENDENCIES_SCOPE,
       dependencyScopeInclude: inputs.DEPENDENCY_SCOPE_INCLUDE,
       dependencyScopeExclude: inputs.DEPENDENCY_SCOPE_EXCLUDE,
-      runtimeContainer: inputs.RUNTIME_CONTAINER
+      runtimeContainer: inputs.RUNTIME_CONTAINER,
+      skipSnippets: SKIP_SNIPPETS,
+      scanFiles: SCAN_FILES,
+      scanossSettings: SCANOSS_SETTINGS,
+      settingsFilePath: SETTINGS_FILE_PATH
     };
   }
   async scan(): Promise<{ scan: ScannerResults; stdout: string; stderr: string }> {
-    const command = await this.buildCommand();
-    const { stdout, stderr } = await exec.getExecOutput(command, []);
+    // Check for basic configuration before running the docker container
+    this.checkBasicConfig();
+
+    const options = {
+      failOnStdErr: false,
+      ignoreReturnCode: true
+    };
+
+    const args = await this.buildArgs();
+    const { stdout, stderr } = await exec.getExecOutput(EXECUTABLE, args, options);
+
     const scan = await this.parseResult();
     return { scan, stdout, stderr };
   }
 
-  private dependencyScopeCommand(): string {
+  /**
+   * @brief Builds the dependency scope command string
+   * @returns {Array<string>} The formatted dependency scope command
+   *
+   * @details
+   * Handles three possible scope configurations:
+   * - Dependency scope exclude
+   * - Dependency scope include
+   * - Dependency scope (prod/dev)
+   *
+   * @throws {Error} When multiple dependency scope filters are set
+   *
+   * @note Only one dependency scope filter can be set at a time
+   */
+  private dependencyScopeArgs(): string[] {
     const { dependencyScopeInclude, dependencyScopeExclude, dependencyScope } = this.options;
 
     // Count the number of non-empty values
@@ -135,28 +191,102 @@ export class ScanService {
     );
 
     if (setScopes.length > 1) {
-      core.setFailed('Only one dependency scope filter can be set');
+      core.error('Only one dependency scope filter can be set');
     }
 
-    if (dependencyScopeExclude !== '') return `--dep-scope-exc ${this.options.dependencyScopeExclude}`;
+    if (dependencyScopeExclude && dependencyScopeExclude !== '') return ['--dep-scope-exc', dependencyScopeExclude];
 
-    if (dependencyScopeInclude !== '') return `--dep-scope-inc ${this.options.dependencyScopeInclude}`;
+    if (dependencyScopeInclude && dependencyScopeInclude !== '') return ['--dep-scope-inc', dependencyScopeInclude];
 
-    if (dependencyScope === 'prod') return '--dep-scope prod';
+    if (dependencyScope && dependencyScope === 'prod') return ['--dep-scope', 'prod'];
 
-    if (dependencyScope === 'dev') return '--dep-scope dev';
+    if (dependencyScope && dependencyScope === 'dev') return ['--dep-scope', 'dev'];
 
-    return '';
+    return [];
   }
 
-  private async buildCommand(): Promise<string> {
-    return `docker run -v "${this.options.inputFilepath}":"/scanoss" ${this.options.runtimeContainer} scan . 
-                    --output ${this.options.outputFilepath}  
-                    ${this.options.dependenciesEnabled ? `--dependencies` : ''}
-                    ${this.dependencyScopeCommand()}  
-                    ${await this.detectSBOM()} 
-                    ${this.options.apiUrl ? `--apiurl ${this.options.apiUrl}` : ''}                    
-                    ${this.options.apiKey ? `--key ${this.options.apiKey}` : ''}`.replace(/\n/gm, ' ');
+  /**
+   * @brief Generates the snippet-related portion of the Docker command
+   * @returns {Array<string>} The snippet command flag (-S) or empty string
+   *
+   * @details
+   * Returns ["-S"] if snippets should be skipped, empty string otherwise
+   */
+  private buildSnippetArgs(): string[] {
+    if (!this.options.skipSnippets) return [];
+    return ['-S'];
+  }
+
+  /**
+   * @brief Constructs the dependencies cmd
+   * @returns {Array<string>} The formatted dependencies command
+   *
+   * @details
+   * Combines dependency scanning options with scope commands.
+   * Possible return values:
+   * - [--dependencies-only, ${scopeCmd}]'
+   * - [--dependencies, ${scopeCmd}]
+   * - Empty array if no dependencies scanning is needed
+   */
+  private buildDependenciesArgs(): string[] {
+    const dependencyScopeCmd = this.dependencyScopeArgs();
+    if (!this.options.scanFiles && this.options.dependenciesEnabled) {
+      return ['--dependencies-only', ...dependencyScopeCmd];
+    } else if (this.options.dependenciesEnabled) {
+      return ['--dependencies', ...dependencyScopeCmd];
+    }
+    return [];
+  }
+
+  /**
+   * @brief Assembles the complete Docker command string
+   * @returns {Promise<Array<string>>} The complete Docker command
+   *
+   * @details
+   * Combines all command components:
+   * - Docker run command with volume mounting
+   * - Runtime container specification
+   * - Scan command with output file
+   * - Dependencies command
+   * - SBOM detection
+   * - Snippet command
+   * - API configuration
+   *
+   */
+  private async buildArgs(): Promise<string[]> {
+    return [
+      'run',
+      '-v',
+      `${this.options.inputFilepath}:/scanoss`,
+      this.options.runtimeContainer,
+      'scan',
+      '.',
+      '--output',
+      `./${OUTPUT_FILEPATH}`,
+      ...this.buildDependenciesArgs(),
+      ...(await this.detectSBOM()),
+      ...this.buildSnippetArgs(),
+      ...(this.options.apiUrl ? ['--apiurl', this.options.apiUrl] : []),
+      ...(this.options.apiKey ? ['--apiKey', this.options.apiKey.replace(/\n/gm, ' ')] : [])
+    ];
+  }
+
+  /**
+   * @brief Validates the basic configuration requirements for scanning
+   *
+   * @throws {Error} When no scan options are enabled
+   *
+   * @details
+   * This method ensures that at least one of the following scan options is enabled:
+   * - scanFiles: For scanning source code files
+   * - dependenciesEnabled: For scanning project dependencies
+   *
+   */
+  private checkBasicConfig(): void {
+    if (!this.options.scanFiles && !this.options.dependenciesEnabled) {
+      core.error(`At least one scan option should be enabled: [scanFiles, dependencyEnabled]`);
+    }
+    core.info("Scan basic config is valid");
   }
 
   /**
@@ -171,15 +301,28 @@ export class ScanService {
    * @returns A command string segment for SBOM ingestion or an empty string if conditions are not met.
    * @private
    */
-  private async detectSBOM(): Promise<string> {
-    if (!this.options.sbomEnabled || !this.options.sbomFilepath) return '';
+  private async detectSBOM(): Promise<string[]> {
+    // Overrides sbom file if is set
+    if (this.options.scanossSettings) {
+      try {
+        await fs.promises.access(this.options.settingsFilePath, fs.constants.F_OK);
+        return ['--settings', this.options.settingsFilePath];
+      } catch (error: any) {
+        if (this.options.settingsFilePath === this.DEFAULT_SETTING_FILE_PATH) return [];
+        core.warning(`SCANOSS settings file not found at '${this.options.settingsFilePath}'. Please provide a valid
+                     SCANOSS settings file path.`);
+        return [];
+      }
+    }
+
+    if (!this.options.sbomEnabled || !this.options.sbomFilepath) return [];
 
     try {
       await fs.promises.access(this.options.sbomFilepath, fs.constants.F_OK);
-      return `--${this.options.sbomType} ${this.options.sbomFilepath}`;
-    } catch (error) {
-      core.warning('SBOM not found');
-      return '';
+      return [`--${this.options.sbomType?.toLowerCase()}`, this.options.sbomFilepath];
+    } catch (error: any) {
+      core.error(error.message);
+      return [];
     }
   }
 
