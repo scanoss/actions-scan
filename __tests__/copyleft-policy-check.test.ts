@@ -44,7 +44,7 @@ describe('CopyleftPolicyCheck', () => {
     (COPYLEFT_LICENSE_INCLUDE as any) = defaultCopyleftLicenseInclude;
   });
 
-  test('Copyleft policy check fail', async () => {
+  it('Copyleft policy check fail', async () => {
     const TEST_DIR = __dirname;
     const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
     const TEST_RESULTS_FILE = 'results.json';
@@ -64,7 +64,7 @@ describe('CopyleftPolicyCheck', () => {
     expect(copyleftPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
   }, 30000);
 
-  test('Copyleft policy empty results', async () => {
+  it('Copyleft policy empty results', async () => {
     const TEST_DIR = __dirname;
     const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
     const TEST_RESULTS_FILE = 'results.json';
@@ -85,7 +85,7 @@ describe('CopyleftPolicyCheck', () => {
     expect(copyleftPolicyCheck.conclusion).toEqual(CONCLUSION.Success);
   }, 30000);
 
-  test('Copyleft policy explicit licenses', async () => {
+  it('Copyleft policy explicit licenses', async () => {
     const TEST_DIR = __dirname;
     const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
     const TEST_RESULTS_FILE = 'results.json';

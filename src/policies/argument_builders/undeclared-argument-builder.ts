@@ -22,36 +22,9 @@
  */
 
 import { ArgumentBuilder } from './argument-builder';
-import {
-  COPYLEFT_LICENSE_EXCLUDE,
-  COPYLEFT_LICENSE_EXPLICIT,
-  COPYLEFT_LICENSE_INCLUDE,
-  OUTPUT_FILEPATH,
-  REPO_DIR,
-  RUNTIME_CONTAINER
-} from '../../app.input';
-import * as core from '@actions/core';
+import { OUTPUT_FILEPATH, REPO_DIR, RUNTIME_CONTAINER, SCANOSS_SETTINGS } from '../../app.input';
 
-export class CopyLeftArgumentBuilder extends ArgumentBuilder {
-  private buildCopyleftArgs(): string[] {
-    if (COPYLEFT_LICENSE_EXPLICIT) {
-      core.info(`Explicit copyleft licenses: ${COPYLEFT_LICENSE_EXPLICIT}`);
-      return ['--explicit', COPYLEFT_LICENSE_EXPLICIT];
-    }
-
-    if (COPYLEFT_LICENSE_INCLUDE) {
-      core.info(`Included copyleft licenses: ${COPYLEFT_LICENSE_INCLUDE}`);
-      return ['--include', COPYLEFT_LICENSE_INCLUDE];
-    }
-
-    if (COPYLEFT_LICENSE_EXCLUDE) {
-      core.info(`Excluded copyleft licenses: ${COPYLEFT_LICENSE_EXCLUDE}`);
-      return ['--exclude', COPYLEFT_LICENSE_EXCLUDE];
-    }
-
-    return [];
-  }
-
+export class UndeclaredArgumentBuilder extends ArgumentBuilder {
   async build(): Promise<string[]> {
     return [
       'run',
@@ -59,12 +32,12 @@ export class CopyLeftArgumentBuilder extends ArgumentBuilder {
       `${REPO_DIR}:/scanoss`,
       RUNTIME_CONTAINER,
       'inspect',
-      'copyleft',
+      'undeclared',
       '--input',
       OUTPUT_FILEPATH,
       '--format',
       'md',
-      ...this.buildCopyleftArgs()
+      ...(!SCANOSS_SETTINGS ? ['--sbom-format', 'legacy'] : []) // Sets sbom format output to legacy if SCANOSS_SETTINGS is not true
     ];
   }
 }

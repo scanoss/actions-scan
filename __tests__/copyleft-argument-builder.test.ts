@@ -21,7 +21,7 @@ describe('CopyleftArgumentBuilder', () => {
     (COPYLEFT_LICENSE_INCLUDE as any) = defaultCopyleftLicenseInclude;
   });
 
-  test('Copyleft explicit test', async () => {
+  it('Copyleft explicit test', async () => {
     (COPYLEFT_LICENSE_EXPLICIT as any) = 'MIT,Apache-2.0';
     (COPYLEFT_LICENSE_EXCLUDE as any) = 'MIT,Apache-2.0';
     (REPO_DIR as any) = 'scanoss';
@@ -45,7 +45,7 @@ describe('CopyleftArgumentBuilder', () => {
     ]);
   });
 
-  test('Copyleft exclude test', async () => {
+  it('Copyleft exclude test', async () => {
     (COPYLEFT_LICENSE_EXCLUDE as any) = 'MIT,Apache-2.0';
     (REPO_DIR as any) = 'scanoss';
     (OUTPUT_FILEPATH as any) = 'results.json';
@@ -67,7 +67,7 @@ describe('CopyleftArgumentBuilder', () => {
     ]);
   });
 
-  test('Copyleft include test', async () => {
+  it('Copyleft include test', async () => {
     (COPYLEFT_LICENSE_INCLUDE as any) = 'MIT,Apache-2.0,LGPL-3.0-only';
     (REPO_DIR as any) = 'scanoss';
     (OUTPUT_FILEPATH as any) = 'results.json';
@@ -89,7 +89,7 @@ describe('CopyleftArgumentBuilder', () => {
     ]);
   });
 
-  test('Copyleft empty parameters test', async () => {
+  it('Copyleft empty parameters test', async () => {
     (REPO_DIR as any) = 'scanoss';
     (OUTPUT_FILEPATH as any) = 'results.json';
     const builder = new CopyLeftArgumentBuilder();
@@ -108,7 +108,7 @@ describe('CopyleftArgumentBuilder', () => {
     ]);
   });
 
-  test('Build Command test', async () => {
+  it('Build Command test', async () => {
     (REPO_DIR as any) = 'scanoss';
     (OUTPUT_FILEPATH as any) = 'results.json';
     const builder = new CopyLeftArgumentBuilder();

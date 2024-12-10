@@ -24,8 +24,10 @@
 import { PolicyCheck } from './policy-check';
 import { CHECK_NAME } from '../app.config';
 import * as core from '@actions/core';
-import { EXECUTABLE, OUTPUT_FILEPATH, REPO_DIR, RUNTIME_CONTAINER, SCANOSS_SETTINGS } from '../app.input';
+import { EXECUTABLE } from '../app.input';
 import * as exec from '@actions/exec';
+import { UndeclaredArgumentBuilder } from './argument_builders/undeclared-argument-builder';
+import { ArgumentBuilder } from './argument_builders/argument-builder';
 
 /**
  * Verifies that all components identified in scanner results are declared in the project's SBOM.
@@ -36,30 +38,16 @@ import * as exec from '@actions/exec';
  */
 export class UndeclaredPolicyCheck extends PolicyCheck {
   static policyName = 'Undeclared Policy';
-  constructor() {
+  private argumentBuilder: ArgumentBuilder;
+  constructor(argumentBuilder: ArgumentBuilder = new UndeclaredArgumentBuilder()) {
     super(`${CHECK_NAME}: ${UndeclaredPolicyCheck.policyName}`);
-  }
-
-  private buildArgs(): string[] {
-    return [
-      'run',
-      '-v',
-      `${REPO_DIR}:/scanoss`,
-      RUNTIME_CONTAINER,
-      'inspect',
-      'undeclared',
-      '--input',
-      OUTPUT_FILEPATH,
-      '--format',
-      'md',
-      ...(!SCANOSS_SETTINGS ? ['--sbom-format', 'legacy'] : []) // Sets sbom format output to legacy if SCANOSS_SETTINGS is not true
-    ];
+    this.argumentBuilder = argumentBuilder;
   }
 
   async run(): Promise<void> {
     core.info(`Running Undeclared Components Policy Check...`);
     super.initStatus();
-    const args = this.buildArgs();
+    const args = await this.argumentBuilder.build();
     core.debug(`Args: ${args}`);
     const options = {
       failOnStdErr: false,

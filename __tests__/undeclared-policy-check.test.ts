@@ -2,8 +2,8 @@ import { CONCLUSION, PolicyCheck } from '../src/policies/policy-check';
 import { ScannerResults } from '../src/services/result.interfaces';
 import { resultsMock } from './results.mock';
 import { UndeclaredPolicyCheck } from '../src/policies/undeclared-policy-check';
-import * as sbomUtils from '../src/utils/sbom.utils';
-import { sbomMock } from './sbom.mock';
+import { OUTPUT_FILEPATH, REPO_DIR } from '../src/app.input';
+import path from 'path';
 
 // Mock the @actions/github module
 jest.mock('@actions/github', () => ({
@@ -40,24 +40,28 @@ describe('UndeclaredPolicyCheck', () => {
   });
 
   it('should pass the policy check when undeclared components are not found', async () => {
-    jest.spyOn(sbomUtils, 'parseSBOM').mockImplementation(async () => Promise.resolve(sbomMock[1]));
+    const TEST_DIR = __dirname;
+    const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
+    const TEST_RESULTS_FILE = 'empty-results.json';
 
-    await undeclaredPolicyCheck.run(scannerResults);
+    // Set the required environment variables
+    (REPO_DIR as any) = TEST_REPO_DIR;
+    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
+
+    await undeclaredPolicyCheck.run();
     expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Success);
   });
 
   it('should fail the policy check when undeclared components are found', async () => {
-    jest.spyOn(sbomUtils, 'parseSBOM').mockImplementation(async () => Promise.resolve(sbomMock[0]));
+    const TEST_DIR = __dirname;
+    const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
+    const TEST_RESULTS_FILE = 'results.json';
 
-    await undeclaredPolicyCheck.run(scannerResults);
-    expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
-  });
+    // Set the required environment variables
+    (REPO_DIR as any) = TEST_REPO_DIR;
+    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
 
-  it('should exceeded the max limit', async () => {
-    jest.spyOn(sbomUtils, 'parseSBOM').mockImplementation(async () => Promise.resolve(sbomMock[0]));
-    scannerResults = JSON.parse(resultsMock[6].content);
-    await undeclaredPolicyCheck.run(scannerResults);
-    // Neutral = Failure on test environment
+    await undeclaredPolicyCheck.run();
     expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
   });
 });
