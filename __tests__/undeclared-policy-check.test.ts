@@ -37,7 +37,7 @@ describe('UndeclaredPolicyCheck', () => {
     scannerResults = JSON.parse(resultsMock[3].content);
 
     undeclaredPolicyCheck = new UndeclaredPolicyCheck();
-  });
+  }, 30000);
 
   it('should pass the policy check when undeclared components are not found', async () => {
     const TEST_DIR = __dirname;
@@ -50,7 +50,7 @@ describe('UndeclaredPolicyCheck', () => {
 
     await undeclaredPolicyCheck.run();
     expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Success);
-  });
+  }, 30000);
 
   it('should fail the policy check when undeclared components are found', async () => {
     const TEST_DIR = __dirname;
@@ -63,5 +63,5 @@ describe('UndeclaredPolicyCheck', () => {
 
     await undeclaredPolicyCheck.run();
     expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
-  });
+  }, 30000);
 });

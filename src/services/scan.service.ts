@@ -346,6 +346,7 @@ export class ScanService {
   private async detectSBOM(): Promise<string[]> {
     // Overrides sbom file if is set
     if (this.options.scanossSettings) {
+      core.debug(`[SCANOSS SETTINGS ENABLED] ${this.options.sbomFilepath}, ${this.options.sbomFilepath}`);
       try {
         await fs.promises.access(this.options.settingsFilePath, fs.constants.F_OK);
         return ['--settings', this.options.settingsFilePath];
@@ -358,9 +359,10 @@ export class ScanService {
     }
 
     if (!this.options.sbomEnabled || !this.options.sbomFilepath) return [];
-
+    core.debug(`[SBOM ENABLED] ${this.options.sbomFilepath}, ${this.options.sbomFilepath}`);
     try {
       await fs.promises.access(this.options.sbomFilepath, fs.constants.F_OK);
+      core.debug(`[SBOM ENABLED] - Adding sbom to scan parameters`);
       return [`--${this.options.sbomType?.toLowerCase()}`, this.options.sbomFilepath];
     } catch (error: any) {
       core.error(error.message);
