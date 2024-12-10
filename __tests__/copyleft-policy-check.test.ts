@@ -1,7 +1,13 @@
+import path from 'path';
+import {
+  COPYLEFT_LICENSE_EXCLUDE,
+  COPYLEFT_LICENSE_EXPLICIT,
+  COPYLEFT_LICENSE_INCLUDE,
+  OUTPUT_FILEPATH,
+  REPO_DIR
+} from '../src/app.input';
 import { CopyleftPolicyCheck } from '../src/policies/copyleft-policy-check';
 import { CONCLUSION, PolicyCheck } from '../src/policies/policy-check';
-import { ScannerResults } from '../src/services/result.interfaces';
-import { resultsMock } from './results.mock';
 
 // Mock the @actions/github module
 jest.mock('@actions/github', () => ({
@@ -14,49 +20,89 @@ jest.mock('@actions/github', () => ({
   getOctokit: jest.fn().mockReturnValue({
     rest: {
       checks: {
-        update: jest.fn().mockResolvedValue({})
+        update: jest.fn().mockResolvedValue({}),
+        create: jest.fn().mockReturnValue({
+          data: {
+            id: 1
+          }
+        })
       }
     }
   })
 }));
 
 describe('CopyleftPolicyCheck', () => {
-  let scannerResults: ScannerResults;
-  let policyCheck: CopyleftPolicyCheck;
+  const defaultCopyleftLicenseExplicit = COPYLEFT_LICENSE_EXPLICIT;
+  const defaultCopyleftLicenseExclude = COPYLEFT_LICENSE_EXCLUDE;
+  const defaultCopyleftLicenseInclude = COPYLEFT_LICENSE_INCLUDE;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  afterEach(() => {
+    // Restore all mocks
+    jest.restoreAllMocks();
+    (COPYLEFT_LICENSE_EXPLICIT as any) = defaultCopyleftLicenseExplicit;
+    (COPYLEFT_LICENSE_EXCLUDE as any) = defaultCopyleftLicenseExclude;
+    (COPYLEFT_LICENSE_INCLUDE as any) = defaultCopyleftLicenseInclude;
+  });
 
-    policyCheck = new CopyleftPolicyCheck();
-    jest.spyOn(PolicyCheck.prototype, 'uploadArtifact').mockImplementation(async () => {
+  test('Copyleft policy check fail', async () => {
+    const TEST_DIR = __dirname;
+    const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
+    const TEST_RESULTS_FILE = 'results.json';
+
+    (REPO_DIR as any) = TEST_REPO_DIR;
+    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
+
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'uploadArtifact').mockImplementation(async () => {
       return Promise.resolve({ id: 123456 });
     });
-    jest.spyOn(PolicyCheck.prototype, 'initStatus').mockImplementation();
-    jest.spyOn(PolicyCheck.prototype, 'finish').mockImplementation();
-  });
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'initStatus').mockImplementation();
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'updateCheck').mockImplementation();
+    const copyleftPolicyCheck = new CopyleftPolicyCheck();
+    await copyleftPolicyCheck.start(1);
+    await copyleftPolicyCheck.run();
+    //neutral cause policy policy halt on failure is not set
+    expect(copyleftPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
+  }, 30000);
 
-  it('should pass the policy check when no copyleft components are found', async () => {
-    scannerResults = JSON.parse(resultsMock[0].content);
-    await policyCheck.run(scannerResults);
-    expect(policyCheck.conclusion).toEqual(CONCLUSION.Success);
-  });
+  test('Copyleft policy empty results', async () => {
+    const TEST_DIR = __dirname;
+    const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
+    const TEST_RESULTS_FILE = 'results.json';
 
-  it('should fail the policy check when copyleft components are found', async () => {
-    scannerResults = JSON.parse(resultsMock[2].content);
-    await policyCheck.run(scannerResults);
-    expect(policyCheck.conclusion).toEqual(CONCLUSION.Neutral);
-  });
+    (REPO_DIR as any) = TEST_REPO_DIR;
+    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
+    (COPYLEFT_LICENSE_EXCLUDE as any) = 'GPL-2.0-only';
 
-  it('should fail the policy check when copyleft dependencies are found', async () => {
-    scannerResults = JSON.parse(resultsMock[4].content);
-    await policyCheck.run(scannerResults);
-    // NEUTRAL is the same as failure in this context.  See inputs.POLICIES_HALT_ON_FAILURE. (Default FALSE)
-    expect(policyCheck.conclusion).toEqual(CONCLUSION.Neutral);
-  });
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'uploadArtifact').mockImplementation(async () => {
+      return Promise.resolve({ id: 123456 });
+    });
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'initStatus').mockImplementation();
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'updateCheck').mockImplementation();
+    const copyleftPolicyCheck = new CopyleftPolicyCheck();
+    await copyleftPolicyCheck.start(1);
+    await copyleftPolicyCheck.run();
+    //neutral cause policy policy halt on failure is not set
+    expect(copyleftPolicyCheck.conclusion).toEqual(CONCLUSION.Success);
+  }, 30000);
 
-  it('should pass the copyleft policy check', async () => {
-    scannerResults = JSON.parse(resultsMock[5].content);
-    await policyCheck.run(scannerResults);
-    expect(policyCheck.conclusion).toEqual(CONCLUSION.Success);
-  });
+  test('Copyleft policy explicit licenses', async () => {
+    const TEST_DIR = __dirname;
+    const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
+    const TEST_RESULTS_FILE = 'results.json';
+
+    (REPO_DIR as any) = TEST_REPO_DIR;
+    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
+    (COPYLEFT_LICENSE_EXPLICIT as any) = 'MIT,Apache-2.0';
+
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'uploadArtifact').mockImplementation(async () => {
+      return Promise.resolve({ id: 123456 });
+    });
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'initStatus').mockImplementation();
+    jest.spyOn(CopyleftPolicyCheck.prototype, 'updateCheck').mockImplementation();
+    const copyleftPolicyCheck = new CopyleftPolicyCheck();
+    await copyleftPolicyCheck.start(1);
+    await copyleftPolicyCheck.run();
+    //neutral cause policy policy halt on failure is not set
+    expect(copyleftPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
+  }, 30000);
 });

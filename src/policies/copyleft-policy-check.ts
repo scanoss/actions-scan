@@ -24,16 +24,10 @@
 import * as core from '@actions/core';
 import { CHECK_NAME } from '../app.config';
 import { PolicyCheck } from './policy-check';
-import {
-  COPYLEFT_LICENSE_EXCLUDE,
-  COPYLEFT_LICENSE_EXPLICIT,
-  COPYLEFT_LICENSE_INCLUDE,
-  EXECUTABLE,
-  OUTPUT_FILEPATH,
-  REPO_DIR,
-  RUNTIME_CONTAINER
-} from '../app.input';
+import { EXECUTABLE } from '../app.input';
 import * as exec from '@actions/exec';
+import { CopyLeftArgumentBuilder } from './argument_builders/copyleft-argument-builder';
+import { ArgumentBuilder } from './argument_builders/argument-builder';
 
 /**
  * This class checks if any of the components identified in the scanner results are subject to copyleft licenses.
@@ -42,50 +36,17 @@ import * as exec from '@actions/exec';
  */
 export class CopyleftPolicyCheck extends PolicyCheck {
   static policyName = 'Copyleft Policy';
+  private argumentBuilder: ArgumentBuilder;
 
-  constructor() {
+  constructor(argumentBuilder: CopyLeftArgumentBuilder = new CopyLeftArgumentBuilder()) {
     super(`${CHECK_NAME}: ${CopyleftPolicyCheck.policyName}`);
-  }
-
-  private buildCopyleftArgs(): string[] {
-    if (COPYLEFT_LICENSE_EXPLICIT) {
-      core.info(`Explicit copyleft licenses: ${COPYLEFT_LICENSE_EXPLICIT}`);
-      return ['--explicit', COPYLEFT_LICENSE_EXPLICIT];
-    }
-
-    if (COPYLEFT_LICENSE_INCLUDE) {
-      core.info(`Included copyleft licenses: ${COPYLEFT_LICENSE_INCLUDE}`);
-      return ['--include', COPYLEFT_LICENSE_INCLUDE];
-    }
-
-    if (COPYLEFT_LICENSE_EXCLUDE) {
-      core.info(`Excluded copyleft licenses: ${COPYLEFT_LICENSE_EXCLUDE}`);
-      return ['--exclude', COPYLEFT_LICENSE_EXCLUDE];
-    }
-
-    return [];
-  }
-
-  private buildArgs(): string[] {
-    return [
-      'run',
-      '-v',
-      `${REPO_DIR}:/scanoss`,
-      RUNTIME_CONTAINER,
-      'inspect',
-      'copyleft',
-      '--input',
-      OUTPUT_FILEPATH,
-      '--format',
-      'md',
-      ...this.buildCopyleftArgs()
-    ];
+    this.argumentBuilder = argumentBuilder;
   }
 
   async run(): Promise<void> {
     core.info(`Running Copyleft Policy Check...`);
     super.initStatus();
-    const args = this.buildArgs();
+    const args = await this.argumentBuilder.build();
     const options = {
       failOnStdErr: false,
       ignoreReturnCode: true

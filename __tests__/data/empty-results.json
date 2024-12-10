@@ -1,0 +1,50 @@
+{
+  "crc32c.c": [
+    {
+      "id": "none",
+      "server": {
+        "kb_version": {
+          "daily": "24.11.12",
+          "monthly": "24.10"
+        },
+        "version": "5.4.8"
+      }
+    }
+  ],
+  "json.c": [
+    {
+      "id": "none",
+      "server": {
+        "kb_version": {
+          "daily": "24.11.12",
+          "monthly": "24.10"
+        },
+        "version": "5.4.8"
+      }
+    }
+  ],
+  "log.c": [
+    {
+      "id": "none",
+      "server": {
+        "kb_version": {
+          "daily": "24.11.12",
+          "monthly": "24.10"
+        },
+        "version": "5.4.8"
+      }
+    }
+  ],
+  "package.json": [
+    {
+      "id": "none",
+      "server": {
+        "kb_version": {
+          "daily": "24.11.12",
+          "monthly": "24.10"
+        },
+        "version": "5.4.8"
+      }
+    }
+  ]
+}

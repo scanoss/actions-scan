@@ -1,0 +1,28 @@
+{
+  "name": "scanoss",
+  "version": "0.15.3",
+  "description": "The SCANOSS JS package provides a simple, easy to consume module for interacting with SCANOSS APIs/Engine.",
+  "main": "build/main/index.js",
+  "typings": "build/main/index.d.ts",
+  "module": "build/module/index.js",
+  "repository": "https://github.com/scanoss/scanoss.js",
+  "license": "MIT",
+  "keywords": [],
+  "bin": {
+    "scanoss-js": "build/main/cli/bin/cli-bin.js"
+  },
+  "scripts": {
+    "build": "run-p build:*",
+    "build:main": "tsc -p tsconfig.json",
+    "build:module": "tsc -p tsconfig.module.json",
+    "test": "nyc mocha -r ts-node/register 'tests/**/*.ts' 'src/**/*.spec.ts'",
+    "install-dev": "npm run build && npm run test && npm install -g ."
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.5.5",
+    "abort-controller": "^3.0.0"
+  }
+}
