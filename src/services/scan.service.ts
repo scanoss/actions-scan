@@ -49,21 +49,6 @@ export async function uploadResults(): Promise<void> {
 
 export interface Options {
   /**
-   * Whether SBOM ingestion is enabled. Optional.
-   */
-  sbomEnabled?: boolean;
-
-  /**
-   * Specifies the SBOM processing type: "identify" or "ignore". Optional.
-   */
-  sbomType?: string;
-
-  /**
-   * Absolute path to the SBOM file. Required if sbomEnabled is set to true.
-   */
-  sbomFilepath?: string;
-
-  /**
    * Enables scanning for dependencies, utilizing scancode internally. Optional.
    */
   dependenciesEnabled?: boolean;
@@ -161,9 +146,6 @@ export class ScanService {
   private DEFAULT_SETTING_FILE_PATH = 'scanoss.json';
   constructor(options?: Options) {
     this.options = options || {
-      sbomFilepath: inputs.SBOM_FILEPATH,
-      sbomType: inputs.SBOM_TYPE,
-      sbomEnabled: inputs.SBOM_ENABLED,
       apiKey: inputs.API_KEY,
       apiUrl: inputs.API_URL,
       dependenciesEnabled: inputs.DEPENDENCIES_ENABLED,
@@ -344,13 +326,8 @@ export class ScanService {
    * @private
    */
   private async detectSBOM(): Promise<string[]> {
-    if (this.options.scanossSettings && this.options.sbomEnabled) {
-      core.warning(`sbom and SCANOSS settings cannot be both enabled`);
-    }
-
     // Overrides sbom file if is set
     if (this.options.scanossSettings) {
-      core.debug(`[SCANOSS SETTINGS ENABLED] ${this.options.sbomFilepath}, ${this.options.sbomFilepath}`);
       try {
         await fs.promises.access(this.options.settingsFilePath, fs.constants.F_OK);
         return ['--settings', this.options.settingsFilePath];
@@ -361,17 +338,7 @@ export class ScanService {
         return [];
       }
     }
-
-    if (!this.options.sbomEnabled || !this.options.sbomFilepath) return [];
-    core.debug(`[SBOM ENABLED] ${this.options.sbomFilepath}, ${this.options.sbomFilepath}`);
-    try {
-      await fs.promises.access(this.options.sbomFilepath, fs.constants.F_OK);
-      core.debug(`[SBOM ENABLED] - Adding sbom to scan parameters`);
-      return [`--${this.options.sbomType?.toLowerCase()}`, this.options.sbomFilepath];
-    } catch (error: any) {
-      core.error(error.message);
-      return [];
-    }
+    return [];
   }
 
   private async parseResult(): Promise<ScannerResults> {

@@ -122,7 +122,6 @@ describe('ScanService', () => {
       dependencyScopeInclude: '',
       dependencyScopeExclude: '',
       dependenciesEnabled: true,
-      sbomEnabled: false,
       scanFiles: true,
       skipSnippets: false,
       settingsFilePath: 'scanoss.json',

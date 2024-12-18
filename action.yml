@@ -14,18 +14,6 @@ inputs:
     description: 'Halt if a check fails'
     required: false
     default: true
-  sbom.enabled:
-    description: 'Enable SBOM Identify'
-    required: false
-    default: false
-  sbom.filepath:
-    description: 'SBOM filepath'
-    required: false
-    default: 'sbom.json'
-  sbom.type:
-    description: 'SBOM type (identify | ignore)'
-    required: false
-    default: 'identify'
   api.key:
     description: 'SCANOSS API Key token (optional - not required for default OSSKB URL)'
     required: false

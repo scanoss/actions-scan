@@ -25,9 +25,6 @@ import * as core from '@actions/core';
 
 export const POLICIES = core.getInput('policies');
 export const POLICIES_HALT_ON_FAILURE = core.getInput('policies.halt_on_failure') === 'true';
-export const SBOM_ENABLED = core.getInput('sbom.enabled') === 'true';
-export const SBOM_FILEPATH = core.getInput('sbom.filepath');
-export const SBOM_TYPE = core.getInput('sbom.type');
 export const DEPENDENCIES_ENABLED = core.getInput('dependencies.enabled') === 'true';
 export const DEPENDENCIES_SCOPE = core.getInput('dependencies.scope');
 export const DEPENDENCY_SCOPE_EXCLUDE = core.getInput('dependencies.scope.exclude');
