@@ -344,6 +344,10 @@ export class ScanService {
    * @private
    */
   private async detectSBOM(): Promise<string[]> {
+    if (this.options.scanossSettings && this.options.sbomEnabled) {
+      core.warning(`sbom and SCANOSS settings cannot be both enabled`);
+    }
+
     // Overrides sbom file if is set
     if (this.options.scanossSettings) {
       core.debug(`[SCANOSS SETTINGS ENABLED] ${this.options.sbomFilepath}, ${this.options.sbomFilepath}`);

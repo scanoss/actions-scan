@@ -1,10 +1,25 @@
-import { OUTPUT_FILEPATH, REPO_DIR, RUNTIME_CONTAINER, SCANOSS_SETTINGS } from '../src/app.input';
+import { RUNTIME_CONTAINER } from '../src/app.input';
 import { UndeclaredArgumentBuilder } from '../src/policies/argument_builders/undeclared-argument-builder';
 
+jest.mock('../src/app.input', () => ({
+  ...jest.requireActual('../src/app.input'),
+  REPO_DIR: '',
+  OUTPUT_FILEPATH: 'results.json',
+  COPYLEFT_LICENSE_EXCLUDE: '',
+  COPYLEFT_LICENSE_EXPLICIT: '',
+  COPYLEFT_LICENSE_INCLUDE: '',
+  SCANOSS_SETTINGS: true,
+  SBOM_ENABLED: false
+}));
+
 describe('UndeclaredArgumentBuilder', () => {
+  const appInput = jest.requireMock('../src/app.input');
+
   it('Build Command test', async function () {
-    (REPO_DIR as any) = 'repodir';
-    (OUTPUT_FILEPATH as any) = 'results.json';
+    appInput.REPO_DIR = 'repodir';
+    appInput.OUTPUT_FILEPATH = 'results.json';
+    appInput.SCANOSS_SETTINGS = false;
+    appInput.SBOM_ENABLED = true;
     const builder = new UndeclaredArgumentBuilder();
     const cmd = await builder.build();
     expect(cmd).toEqual([
@@ -24,9 +39,9 @@ describe('UndeclaredArgumentBuilder', () => {
   });
 
   it('Build Command style scanoss.json', async function () {
-    (REPO_DIR as any) = 'repodir';
-    (OUTPUT_FILEPATH as any) = 'results.json';
-    (SCANOSS_SETTINGS as any) = true;
+    appInput.REPO_DIR = 'repodir';
+    appInput.OUTPUT_FILEPATH = 'results.json';
+    appInput.SCANOSS_SETTINGS = true;
     const builder = new UndeclaredArgumentBuilder();
     const cmd = await builder.build();
     expect(cmd).toEqual([

@@ -17,7 +17,7 @@ inputs:
   sbom.enabled:
     description: 'Enable SBOM Identify'
     required: false
-    default: true
+    default: false
   sbom.filepath:
     description: 'SBOM filepath'
     required: false

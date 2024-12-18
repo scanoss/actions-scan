@@ -1,9 +1,19 @@
-import { OUTPUT_FILEPATH, RUNTIME_CONTAINER } from '../src/app.input';
+import { RUNTIME_CONTAINER } from '../src/app.input';
 import { ScanService } from '../src/services/scan.service';
 import fs from 'fs';
 import path from 'path';
 
+jest.mock('../src/app.input', () => ({
+  ...jest.requireActual('../src/app.input'),
+  REPO_DIR: '',
+  OUTPUT_FILEPATH: 'results.json',
+  COPYLEFT_LICENSE_EXCLUDE: '',
+  COPYLEFT_LICENSE_EXPLICIT: '',
+  COPYLEFT_LICENSE_INCLUDE: ''
+}));
+
 describe('ScanService', () => {
+  const appInput = jest.requireMock('../src/app.input');
   it('should correctly return the dependency scope command', () => {
     const service = new ScanService({
       outputFilepath: '',
@@ -102,7 +112,7 @@ describe('ScanService', () => {
   });
 
   it('Should scan dependencies', async () => {
-    (OUTPUT_FILEPATH as any) = 'test-results.json';
+    appInput.OUTPUT_FILEPATH = 'test-results.json';
     const TEST_DIR = __dirname;
     const resultPath = path.join(TEST_DIR, 'data', 'test-results.json');
     const service = new ScanService({

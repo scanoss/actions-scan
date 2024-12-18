@@ -1,13 +1,15 @@
 import path from 'path';
-import {
-  COPYLEFT_LICENSE_EXCLUDE,
-  COPYLEFT_LICENSE_EXPLICIT,
-  COPYLEFT_LICENSE_INCLUDE,
-  OUTPUT_FILEPATH,
-  REPO_DIR
-} from '../src/app.input';
 import { CopyleftPolicyCheck } from '../src/policies/copyleft-policy-check';
-import { CONCLUSION, PolicyCheck } from '../src/policies/policy-check';
+import { CONCLUSION } from '../src/policies/policy-check';
+
+jest.mock('../src/app.input', () => ({
+  ...jest.requireActual('../src/app.input'),
+  REPO_DIR: '',
+  OUTPUT_FILEPATH: 'results.json',
+  COPYLEFT_LICENSE_EXCLUDE: '',
+  COPYLEFT_LICENSE_EXPLICIT: '',
+  COPYLEFT_LICENSE_INCLUDE: ''
+}));
 
 // Mock the @actions/github module
 jest.mock('@actions/github', () => ({
@@ -32,16 +34,12 @@ jest.mock('@actions/github', () => ({
 }));
 
 describe('CopyleftPolicyCheck', () => {
-  const defaultCopyleftLicenseExplicit = COPYLEFT_LICENSE_EXPLICIT;
-  const defaultCopyleftLicenseExclude = COPYLEFT_LICENSE_EXCLUDE;
-  const defaultCopyleftLicenseInclude = COPYLEFT_LICENSE_INCLUDE;
+  const appInput = jest.requireMock('../src/app.input');
 
   afterEach(() => {
-    // Restore all mocks
-    jest.restoreAllMocks();
-    (COPYLEFT_LICENSE_EXPLICIT as any) = defaultCopyleftLicenseExplicit;
-    (COPYLEFT_LICENSE_EXCLUDE as any) = defaultCopyleftLicenseExclude;
-    (COPYLEFT_LICENSE_INCLUDE as any) = defaultCopyleftLicenseInclude;
+    appInput.COPYLEFT_LICENSE_EXPLICIT = '';
+    appInput.COPYLEFT_LICENSE_EXCLUDE = '';
+    appInput.COPYLEFT_LICENSE_INCLUDE = '';
   });
 
   it('Copyleft policy check fail', async () => {
@@ -49,8 +47,8 @@ describe('CopyleftPolicyCheck', () => {
     const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
     const TEST_RESULTS_FILE = 'results.json';
 
-    (REPO_DIR as any) = TEST_REPO_DIR;
-    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
+    appInput.REPO_DIR = TEST_REPO_DIR;
+    appInput.OUTPUT_FILEPATH = TEST_RESULTS_FILE;
 
     jest.spyOn(CopyleftPolicyCheck.prototype, 'uploadArtifact').mockImplementation(async () => {
       return Promise.resolve({ id: 123456 });
@@ -69,9 +67,9 @@ describe('CopyleftPolicyCheck', () => {
     const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
     const TEST_RESULTS_FILE = 'results.json';
 
-    (REPO_DIR as any) = TEST_REPO_DIR;
-    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
-    (COPYLEFT_LICENSE_EXCLUDE as any) = 'GPL-2.0-only';
+    appInput.REPO_DIR = TEST_REPO_DIR;
+    appInput.OUTPUT_FILEPATH = TEST_RESULTS_FILE;
+    appInput.COPYLEFT_LICENSE_EXCLUDE = 'GPL-2.0-only';
 
     jest.spyOn(CopyleftPolicyCheck.prototype, 'uploadArtifact').mockImplementation(async () => {
       return Promise.resolve({ id: 123456 });
@@ -90,9 +88,9 @@ describe('CopyleftPolicyCheck', () => {
     const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
     const TEST_RESULTS_FILE = 'results.json';
 
-    (REPO_DIR as any) = TEST_REPO_DIR;
-    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
-    (COPYLEFT_LICENSE_EXPLICIT as any) = 'MIT,Apache-2.0';
+    appInput.REPO_DIR = TEST_REPO_DIR;
+    appInput.OUTPUT_FILEPATH = TEST_RESULTS_FILE;
+    appInput.COPYLEFT_LICENSE_EXPLICIT = 'MIT,Apache-2.0';
 
     jest.spyOn(CopyleftPolicyCheck.prototype, 'uploadArtifact').mockImplementation(async () => {
       return Promise.resolve({ id: 123456 });

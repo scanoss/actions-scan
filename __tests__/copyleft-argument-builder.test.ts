@@ -1,32 +1,27 @@
-import {
-  COPYLEFT_LICENSE_EXCLUDE,
-  COPYLEFT_LICENSE_EXPLICIT,
-  COPYLEFT_LICENSE_INCLUDE,
-  OUTPUT_FILEPATH,
-  REPO_DIR,
-  RUNTIME_CONTAINER
-} from '../src/app.input';
 import { CopyLeftArgumentBuilder } from '../src/policies/argument_builders/copyleft-argument-builder';
+import { RUNTIME_CONTAINER } from '../src/app.input';
 
+jest.mock('../src/app.input', () => ({
+  ...jest.requireActual('../src/app.input'),
+  REPO_DIR: 'scanoss',
+  OUTPUT_FILEPATH: 'results.json',
+  COPYLEFT_LICENSE_EXCLUDE: '',
+  COPYLEFT_LICENSE_EXPLICIT: '',
+  COPYLEFT_LICENSE_INCLUDE: ''
+}));
 describe('CopyleftArgumentBuilder', () => {
-  const defaultCopyleftLicenseExplicit = COPYLEFT_LICENSE_EXPLICIT;
-  const defaultCopyleftLicenseExclude = COPYLEFT_LICENSE_EXCLUDE;
-  const defaultCopyleftLicenseInclude = COPYLEFT_LICENSE_INCLUDE;
+  // Store the module for direct manipulation
+  const appInput = jest.requireMock('../src/app.input');
 
   afterEach(() => {
-    // Restore all mocks
-    jest.restoreAllMocks();
-    (COPYLEFT_LICENSE_EXPLICIT as any) = defaultCopyleftLicenseExplicit;
-    (COPYLEFT_LICENSE_EXCLUDE as any) = defaultCopyleftLicenseExclude;
-    (COPYLEFT_LICENSE_INCLUDE as any) = defaultCopyleftLicenseInclude;
+    appInput.COPYLEFT_LICENSE_EXPLICIT = '';
+    appInput.COPYLEFT_LICENSE_EXCLUDE = '';
+    appInput.COPYLEFT_LICENSE_INCLUDE = '';
   });
 
   it('Copyleft explicit test', async () => {
-    (COPYLEFT_LICENSE_EXPLICIT as any) = 'MIT,Apache-2.0';
-    (COPYLEFT_LICENSE_EXCLUDE as any) = 'MIT,Apache-2.0';
-    (REPO_DIR as any) = 'scanoss';
-    (OUTPUT_FILEPATH as any) = 'results.json';
-
+    appInput.COPYLEFT_LICENSE_EXPLICIT = 'MIT,Apache-2.0';
+    appInput.COPYLEFT_LICENSE_EXCLUDE = 'MIT,Apache-2.0';
     const builder = new CopyLeftArgumentBuilder();
     const cmd = await builder.build();
     expect(cmd).toEqual([
@@ -46,9 +41,7 @@ describe('CopyleftArgumentBuilder', () => {
   });
 
   it('Copyleft exclude test', async () => {
-    (COPYLEFT_LICENSE_EXCLUDE as any) = 'MIT,Apache-2.0';
-    (REPO_DIR as any) = 'scanoss';
-    (OUTPUT_FILEPATH as any) = 'results.json';
+    appInput.COPYLEFT_LICENSE_EXCLUDE = 'MIT,Apache-2.0';
     const builder = new CopyLeftArgumentBuilder();
     const cmd = await builder.build();
     expect(cmd).toEqual([
@@ -68,9 +61,7 @@ describe('CopyleftArgumentBuilder', () => {
   });
 
   it('Copyleft include test', async () => {
-    (COPYLEFT_LICENSE_INCLUDE as any) = 'MIT,Apache-2.0,LGPL-3.0-only';
-    (REPO_DIR as any) = 'scanoss';
-    (OUTPUT_FILEPATH as any) = 'results.json';
+    appInput.COPYLEFT_LICENSE_INCLUDE = 'MIT,Apache-2.0,LGPL-3.0-only';
     const builder = new CopyLeftArgumentBuilder();
     const cmd = await builder.build();
     expect(cmd).toEqual([
@@ -90,8 +81,6 @@ describe('CopyleftArgumentBuilder', () => {
   });
 
   it('Copyleft empty parameters test', async () => {
-    (REPO_DIR as any) = 'scanoss';
-    (OUTPUT_FILEPATH as any) = 'results.json';
     const builder = new CopyLeftArgumentBuilder();
     const cmd = await builder.build();
     expect(cmd).toEqual([
@@ -109,8 +98,6 @@ describe('CopyleftArgumentBuilder', () => {
   });
 
   it('Build Command test', async () => {
-    (REPO_DIR as any) = 'scanoss';
-    (OUTPUT_FILEPATH as any) = 'results.json';
     const builder = new CopyLeftArgumentBuilder();
     const cmd = await builder.build();
     expect(cmd).toEqual([

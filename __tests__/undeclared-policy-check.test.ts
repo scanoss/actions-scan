@@ -1,9 +1,15 @@
 import { CONCLUSION, PolicyCheck } from '../src/policies/policy-check';
-import { ScannerResults } from '../src/services/result.interfaces';
-import { resultsMock } from './results.mock';
 import { UndeclaredPolicyCheck } from '../src/policies/undeclared-policy-check';
-import { OUTPUT_FILEPATH, REPO_DIR } from '../src/app.input';
 import path from 'path';
+
+jest.mock('../src/app.input', () => ({
+  ...jest.requireActual('../src/app.input'),
+  REPO_DIR: '',
+  OUTPUT_FILEPATH: 'results.json',
+  COPYLEFT_LICENSE_EXCLUDE: '',
+  COPYLEFT_LICENSE_EXPLICIT: '',
+  COPYLEFT_LICENSE_INCLUDE: ''
+}));
 
 // Mock the @actions/github module
 jest.mock('@actions/github', () => ({
@@ -23,8 +29,8 @@ jest.mock('@actions/github', () => ({
 }));
 
 describe('UndeclaredPolicyCheck', () => {
-  let scannerResults: ScannerResults;
   let undeclaredPolicyCheck: UndeclaredPolicyCheck;
+  const appInput = jest.requireMock('../src/app.input');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -33,8 +39,6 @@ describe('UndeclaredPolicyCheck', () => {
     });
     jest.spyOn(PolicyCheck.prototype, 'initStatus').mockImplementation();
     jest.spyOn(UndeclaredPolicyCheck.prototype, 'updateCheck').mockImplementation();
-
-    scannerResults = JSON.parse(resultsMock[3].content);
 
     undeclaredPolicyCheck = new UndeclaredPolicyCheck();
   }, 30000);
@@ -45,8 +49,8 @@ describe('UndeclaredPolicyCheck', () => {
     const TEST_RESULTS_FILE = 'empty-results.json';
 
     // Set the required environment variables
-    (REPO_DIR as any) = TEST_REPO_DIR;
-    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
+    appInput.REPO_DIR = TEST_REPO_DIR;
+    appInput.OUTPUT_FILEPATH = TEST_RESULTS_FILE;
 
     await undeclaredPolicyCheck.run();
     expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Success);
@@ -58,8 +62,8 @@ describe('UndeclaredPolicyCheck', () => {
     const TEST_RESULTS_FILE = 'results.json';
 
     // Set the required environment variables
-    (REPO_DIR as any) = TEST_REPO_DIR;
-    (OUTPUT_FILEPATH as any) = TEST_RESULTS_FILE;
+    appInput.REPO_DIR = TEST_REPO_DIR;
+    appInput.OUTPUT_FILEPATH = TEST_RESULTS_FILE;
 
     await undeclaredPolicyCheck.run();
     expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
