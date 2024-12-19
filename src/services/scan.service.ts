@@ -338,7 +338,8 @@ export class ScanService {
         return [];
       }
     }
-    return [];
+    // Force scanoss.py to not load the settings.json file
+    return ['-stf'];
   }
 
   private async parseResult(): Promise<ScannerResults> {
