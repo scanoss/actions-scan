@@ -54,7 +54,7 @@ export async function run(): Promise<void> {
 
     // run policies
     for (const policy of policies) {
-      await policy.run(scan);
+      await policy.run();
     }
 
     if (isPullRequest()) {

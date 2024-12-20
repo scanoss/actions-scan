@@ -25,7 +25,6 @@ import { context, getOctokit } from '@actions/github';
 import { promises as fs } from 'fs';
 import * as core from '@actions/core';
 import { getSHA } from '../utils/github.utils';
-import { ScannerResults } from '../services/result.interfaces';
 import { GitHub } from '@actions/github/lib/utils';
 import * as inputs from '../app.input';
 import { DefaultArtifactClient, UploadArtifactResponse } from '@actions/artifact';
@@ -82,7 +81,7 @@ export abstract class PolicyCheck {
 
   abstract getPolicyName(): string;
 
-  abstract run(scannerResults: ScannerResults): Promise<void>;
+  abstract run(): Promise<void>;
 
   async start(runId: number): Promise<CheckRun> {
     const result = await this.octokit.rest.checks.create({

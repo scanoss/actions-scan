@@ -14,18 +14,6 @@ inputs:
     description: 'Halt if a check fails'
     required: false
     default: true
-  sbom.enabled:
-    description: 'Enable SBOM Identify'
-    required: false
-    default: true
-  sbom.filepath:
-    description: 'SBOM filepath'
-    required: false
-    default: 'sbom.json'
-  sbom.type:
-    description: 'SBOM type (identify | ignore)'
-    required: false
-    default: 'identify'
   api.key:
     description: 'SCANOSS API Key token (optional - not required for default OSSKB URL)'
     required: false
@@ -66,7 +54,23 @@ inputs:
     required: false
   runtimeContainer:
     description: 'Specify runtime container to perform the scan.'
-    default: 'ghcr.io/scanoss/scanoss-py:v1.15.0'
+    default: 'ghcr.io/scanoss/scanoss-py:v1.19.0'
+    required: false
+  skipSnippets:
+    description: 'Skip the generation of snippets.'
+    default: false
+    required: false
+  scanFiles:
+    description: 'Enable or disable file and snippet scanning.'
+    default: true
+    required: false
+  scanossSettings:
+    description: 'Settings file to use for scanning.'
+    default: true
+    required: false
+  settingsFilepath:
+    description: 'SCANOSS settings file path.'
+    default: 'scanoss.json'
     required: false
 
 

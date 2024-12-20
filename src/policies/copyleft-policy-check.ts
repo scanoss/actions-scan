@@ -21,12 +21,13 @@
    THE SOFTWARE.
  */
 
-import { ScannerResults } from '../services/result.interfaces';
+import * as core from '@actions/core';
 import { CHECK_NAME } from '../app.config';
 import { PolicyCheck } from './policy-check';
-import { Component, getComponents } from '../services/result.service';
-import { generateTable } from '../utils/markdown.utils';
-import { licenseUtil } from '../utils/license.utils';
+import { EXECUTABLE } from '../app.input';
+import * as exec from '@actions/exec';
+import { CopyLeftArgumentBuilder } from './argument_builders/copyleft-argument-builder';
+import { ArgumentBuilder } from './argument_builders/argument-builder';
 
 /**
  * This class checks if any of the components identified in the scanner results are subject to copyleft licenses.
@@ -35,90 +36,37 @@ import { licenseUtil } from '../utils/license.utils';
  */
 export class CopyleftPolicyCheck extends PolicyCheck {
   static policyName = 'Copyleft Policy';
-  private copyleftLicenses = new Set<string>(
-    [
-      'GPL-1.0-only',
-      'GPL-2.0-only',
-      'GPL-3.0-only',
-      'AGPL-3.0-only',
-      'Sleepycat',
-      'Watcom-1.0',
-      'GFDL-1.1-only',
-      'GFDL-1.2-only',
-      'GFDL-1.3-only',
-      'LGPL-2.1-only',
-      'LGPL-3.0-only',
-      'MPL-1.1',
-      'MPL-2.0',
-      'EPL-1.0',
-      'EPL-2.0',
-      'CDDL-1.0',
-      'CDDL-1.1',
-      'CECILL-2.1',
-      'Artistic-1.0',
-      'Artistic-2.0',
-      'CC-BY-SA-4.0'
-    ].map(l => l.toLowerCase())
-  );
+  private argumentBuilder: ArgumentBuilder;
 
-  constructor() {
+  constructor(argumentBuilder: CopyLeftArgumentBuilder = new CopyLeftArgumentBuilder()) {
     super(`${CHECK_NAME}: ${CopyleftPolicyCheck.policyName}`);
+    this.argumentBuilder = argumentBuilder;
   }
 
-  async run(scannerResults: ScannerResults): Promise<void> {
+  async run(): Promise<void> {
+    core.info(`Running Copyleft Policy Check...`);
     super.initStatus();
-    const components = getComponents(scannerResults);
+    const args = await this.argumentBuilder.build();
+    const options = {
+      failOnStdErr: false,
+      ignoreReturnCode: true
+    };
 
-    // Filter copyleft components
-    const componentsWithCopyleft = components.filter(component =>
-      component.licenses.some(
-        license => !!license.copyleft || licenseUtil.isCopyLeft(license.spdxid.trim().toLowerCase())
-      )
-    );
-
-    const summary = this.getSummary(componentsWithCopyleft);
-    let details = this.getDetails(componentsWithCopyleft);
-
-    if (details) {
-      const { id } = await this.uploadArtifact(details);
-      if (id) details = await this.concatPolicyArtifactURLToPolicyCheck(details, id);
+    const { stdout, stderr, exitCode } = await exec.getExecOutput(EXECUTABLE, args, options);
+    const summary = stdout;
+    let details = stderr;
+    if (exitCode === 1) {
+      await this.success('### :white_check_mark: Policy Pass \n #### Not copyleft Licenses were found', undefined);
+      return;
     }
 
-    if (componentsWithCopyleft.length === 0) {
-      return this.success(summary, details);
-    } else {
-      return this.reject(summary, details);
+    const { id } = await this.uploadArtifact(stdout);
+    core.debug(`Copyleft Artifact ID: ${id}`);
+    if (id) {
+      details = await this.concatPolicyArtifactURLToPolicyCheck(stderr, id);
     }
-  }
 
-  private getSummary(components: Component[]): string {
-    return components.length === 0
-      ? '### :white_check_mark: Policy Pass \n #### Not copyleft components were found'
-      : `### :x: Policy Fail \n #### ${components.length} component(s) with copyleft licenses were found. \n See details for more information.`;
-  }
-
-  private getDetails(components: Component[]): string | undefined {
-    if (components.length === 0) return undefined;
-
-    const headers = ['Component', 'Version', 'License', 'URL', 'Copyleft'];
-    const centeredColumns = [1, 4];
-    const rows: string[][] = [];
-
-    components.forEach(component => {
-      component.licenses.forEach(license => {
-        if (licenseUtil.isCopyLeft(license.spdxid?.trim().toLowerCase())) {
-          const copyleftIcon = licenseUtil.isCopyLeft(license.spdxid?.trim().toLowerCase()) ? 'YES' : 'NO';
-          rows.push([
-            component.purl,
-            component.version,
-            license.spdxid,
-            `${licenseUtil.getOSADL(license?.spdxid) || ''}`,
-            copyleftIcon
-          ]);
-        }
-      });
-    });
-    return `### Copyleft licenses \n ${generateTable(headers, rows, centeredColumns)}`;
+    return this.reject(summary, details);
   }
 
   artifactPolicyFileName(): string {

@@ -1,0 +1,225 @@
+{
+  "crc32c.c": [
+    {
+      "component": "wfp",
+      "file": "wfp-6afc1f6163d1d6c8d03ff5211a0571118e08da1f/src/external/crc32c/crc32c.c",
+      "file_hash": "0fe279946d388ef07d9c3f6e3ffb8ebe",
+      "file_url": "https://api.osskb.org/file_contents/0fe279946d388ef07d9c3f6e3ffb8ebe",
+      "id": "file",
+      "latest": "0ed473d",
+      "licenses": [
+        {
+          "checklist_url": "https://www.osadl.org/fileadmin/checklists/unreflicenses/Zlib.txt",
+          "copyleft": "no",
+          "name": "Zlib",
+          "osadl_updated": "2024-11-04T13:45:00+0000",
+          "patent_hints": "no",
+          "source": "scancode",
+          "url": "https://spdx.org/licenses/Zlib.html"
+        },
+        {
+          "checklist_url": "https://www.osadl.org/fileadmin/checklists/unreflicenses/Zlib.txt",
+          "copyleft": "no",
+          "name": "Zlib",
+          "osadl_updated": "2024-11-04T13:45:00+0000",
+          "patent_hints": "no",
+          "source": "file_header",
+          "url": "https://spdx.org/licenses/Zlib.html"
+        },
+        {
+          "checklist_url": "https://www.osadl.org/fileadmin/checklists/unreflicenses/GPL-2.0-only.txt",
+          "copyleft": "yes",
+          "incompatible_with": "Apache-1.0, Apache-1.1, Apache-2.0, BSD-4-Clause, BSD-4-Clause-UC, BSD-4.3TAHOE, ECL-2.0, FTL, IJG, LicenseRef-scancode-bsla-no-advert, Minpack, OpenSSL, PHP-3.01, Python-2.0, zlib-acknowledgement, XFree86-1.1",
+          "name": "GPL-2.0-only",
+          "osadl_updated": "2024-11-04T13:45:00+0000",
+          "patent_hints": "yes",
+          "source": "scancode",
+          "url": "https://spdx.org/licenses/GPL-2.0-only.html"
+        },
+        {
+          "checklist_url": "https://www.osadl.org/fileadmin/checklists/unreflicenses/GPL-2.0-only.txt",
+          "copyleft": "yes",
+          "incompatible_with": "Apache-1.0, Apache-1.1, Apache-2.0, BSD-4-Clause, BSD-4-Clause-UC, BSD-4.3TAHOE, ECL-2.0, FTL, IJG, LicenseRef-scancode-bsla-no-advert, Minpack, OpenSSL, PHP-3.01, Python-2.0, zlib-acknowledgement, XFree86-1.1",
+          "name": "GPL-2.0-only",
+          "osadl_updated": "2024-11-04T13:45:00+0000",
+          "patent_hints": "yes",
+          "source": "license_file",
+          "url": "https://spdx.org/licenses/GPL-2.0-only.html"
+        },
+        {
+          "checklist_url": "https://www.osadl.org/fileadmin/checklists/unreflicenses/GPL-2.0-only.txt",
+          "copyleft": "yes",
+          "incompatible_with": "Apache-1.0, Apache-1.1, Apache-2.0, BSD-4-Clause, BSD-4-Clause-UC, BSD-4.3TAHOE, ECL-2.0, FTL, IJG, LicenseRef-scancode-bsla-no-advert, Minpack, OpenSSL, PHP-3.01, Python-2.0, zlib-acknowledgement, XFree86-1.1",
+          "name": "GPL-2.0-only",
+          "osadl_updated": "2024-11-04T13:45:00+0000",
+          "patent_hints": "yes",
+          "source": "component_declared",
+          "url": "https://spdx.org/licenses/GPL-2.0-only.html"
+        }
+      ],
+      "lines": "all",
+      "matched": "100%",
+      "oss_lines": "all",
+      "purl": [
+        "pkg:github/scanoss/wfp"
+      ],
+      "release_date": "2020-07-12",
+      "server": {
+        "kb_version": {
+          "daily": "24.11.12",
+          "monthly": "24.10"
+        },
+        "version": "5.4.8"
+      },
+      "source_hash": "0fe279946d388ef07d9c3f6e3ffb8ebe",
+      "status": "pending",
+      "url": "https://github.com/scanoss/wfp",
+      "url_hash": "9b36f30d422d7f77854f298f63c55256",
+      "url_stats": {},
+      "vendor": "scanoss",
+      "version": "6afc1f6"
+    }
+  ],
+  "json.c": [
+    {
+      "component": "scanner.c",
+      "file": "scanner.c-1.3.3/external/src/json.c",
+      "file_hash": "8e4d433c1547b59681379e9fe9960546",
+      "file_url": "https://api.osskb.org/file_contents/8e4d433c1547b59681379e9fe9960546",
+      "id": "file",
+      "latest": "1.3.4",
+      "licenses": [
+        {
+          "checklist_url": "https://www.osadl.org/fileadmin/checklists/unreflicenses/BSD-2-Clause.txt",
+          "copyleft": "no",
+          "name": "BSD-2-Clause",
+          "osadl_updated": "2024-11-04T13:45:00+0000",
+          "patent_hints": "no",
+          "source": "file_header",
+          "url": "https://spdx.org/licenses/BSD-2-Clause.html"
+        },
+        {
+          "checklist_url": "https://www.osadl.org/fileadmin/checklists/unreflicenses/GPL-2.0-only.txt",
+          "copyleft": "yes",
+          "incompatible_with": "Apache-1.0, Apache-1.1, Apache-2.0, BSD-4-Clause, BSD-4-Clause-UC, BSD-4.3TAHOE, ECL-2.0, FTL, IJG, LicenseRef-scancode-bsla-no-advert, Minpack, OpenSSL, PHP-3.01, Python-2.0, zlib-acknowledgement, XFree86-1.1",
+          "name": "GPL-2.0-only",
+          "osadl_updated": "2024-11-04T13:45:00+0000",
+          "patent_hints": "yes",
+          "source": "component_declared",
+          "url": "https://spdx.org/licenses/GPL-2.0-only.html"
+        }
+      ],
+      "lines": "all",
+      "matched": "100%",
+      "oss_lines": "all",
+      "purl": [
+        "pkg:github/scanoss/scanner.c"
+      ],
+      "release_date": "2021-05-26",
+      "server": {
+        "kb_version": {
+          "daily": "24.11.12",
+          "monthly": "24.10"
+        },
+        "version": "5.4.8"
+      },
+      "source_hash": "8e4d433c1547b59681379e9fe9960546",
+      "status": "pending",
+      "url": "https://github.com/scanoss/scanner.c",
+      "url_hash": "2d1700ba496453d779d4987255feb5f2",
+      "url_stats": {},
+      "vendor": "scanoss",
+      "version": "1.3.3"
+    }
+  ],
+  "log.c": [
+    {
+      "component": "scanner.c",
+      "file": "scanner.c-1.3.3/external/src/log.c",
+      "file_hash": "f00c8a010806ff1593b15c7cbff7e594",
+      "file_url": "https://api.osskb.org/file_contents/f00c8a010806ff1593b15c7cbff7e594",
+      "id": "file",
+      "latest": "1.3.4",
+      "licenses": [
+        {
+          "checklist_url": "https://www.osadl.org/fileadmin/checklists/unreflicenses/GPL-2.0-only.txt",
+          "copyleft": "yes",
+          "incompatible_with": "Apache-1.0, Apache-1.1, Apache-2.0, BSD-4-Clause, BSD-4-Clause-UC, BSD-4.3TAHOE, ECL-2.0, FTL, IJG, LicenseRef-scancode-bsla-no-advert, Minpack, OpenSSL, PHP-3.01, Python-2.0, zlib-acknowledgement, XFree86-1.1",
+          "name": "GPL-2.0-only",
+          "osadl_updated": "2024-11-04T13:45:00+0000",
+          "patent_hints": "yes",
+          "source": "component_declared",
+          "url": "https://spdx.org/licenses/GPL-2.0-only.html"
+        }
+      ],
+      "lines": "all",
+      "matched": "100%",
+      "oss_lines": "all",
+      "purl": [
+        "pkg:github/scanoss/scanner.c"
+      ],
+      "release_date": "2021-05-26",
+      "server": {
+        "kb_version": {
+          "daily": "24.11.12",
+          "monthly": "24.10"
+        },
+        "version": "5.4.8"
+      },
+      "source_hash": "f00c8a010806ff1593b15c7cbff7e594",
+      "status": "pending",
+      "url": "https://github.com/scanoss/scanner.c",
+      "url_hash": "2d1700ba496453d779d4987255feb5f2",
+      "url_stats": {},
+      "vendor": "scanoss",
+      "version": "1.3.3"
+    }
+  ],
+  "package.json": [
+    {
+      "dependencies": [
+        {
+          "component": "@grpc/grpc-js",
+          "licenses": [
+            {
+              "is_spdx_approved": true,
+              "name": "Apache-2.0",
+              "spdx_id": "Apache-2.0"
+            }
+          ],
+          "purl": "pkg:npm/%40grpc/grpc-js",
+          "url": "https://www.npmjs.com/package/%40grpc/grpc-js",
+          "version": "1.12.2"
+        },
+        {
+          "component": "abort-controller",
+          "licenses": [
+            {
+              "is_spdx_approved": true,
+              "name": "MIT",
+              "spdx_id": "MIT"
+            }
+          ],
+          "purl": "pkg:npm/abort-controller",
+          "url": "https://www.npmjs.com/package/abort-controller",
+          "version": "3.0.0"
+        },
+        {
+          "component": "adm-zip",
+          "licenses": [
+            {
+              "is_spdx_approved": true,
+              "name": "MIT",
+              "spdx_id": "MIT"
+            }
+          ],
+          "purl": "pkg:npm/adm-zip",
+          "url": "https://www.npmjs.com/package/adm-zip",
+          "version": "0.5.16"
+        }
+      ],
+      "id": "dependency",
+      "status": "pending"
+    }
+  ]
+}

@@ -23,12 +23,11 @@
 
 import { PolicyCheck } from './policy-check';
 import { CHECK_NAME } from '../app.config';
-import { ScannerResults } from '../services/result.interfaces';
-import { Component, getComponents } from '../services/result.service';
-import * as inputs from '../app.input';
 import * as core from '@actions/core';
-import { parseSBOM } from '../utils/sbom.utils';
-import { generateTable } from '../utils/markdown.utils';
+import { EXECUTABLE, SCANOSS_SETTINGS } from '../app.input';
+import * as exec from '@actions/exec';
+import { UndeclaredArgumentBuilder } from './argument_builders/undeclared-argument-builder';
+import { ArgumentBuilder } from './argument_builders/argument-builder';
 
 /**
  * Verifies that all components identified in scanner results are declared in the project's SBOM.
@@ -39,74 +38,40 @@ import { generateTable } from '../utils/markdown.utils';
  */
 export class UndeclaredPolicyCheck extends PolicyCheck {
   static policyName = 'Undeclared Policy';
-  constructor() {
+  private argumentBuilder: ArgumentBuilder;
+  constructor(argumentBuilder: ArgumentBuilder = new UndeclaredArgumentBuilder()) {
     super(`${CHECK_NAME}: ${UndeclaredPolicyCheck.policyName}`);
+    this.argumentBuilder = argumentBuilder;
   }
 
-  async run(scannerResults: ScannerResults): Promise<void> {
+  async run(): Promise<void> {
+    core.info(`Running Undeclared Components Policy Check...`);
     super.initStatus();
+    const args = await this.argumentBuilder.build();
+    core.debug(`Args: ${args}`);
+    const options = {
+      failOnStdErr: false,
+      ignoreReturnCode: true
+    };
 
-    const nonDeclaredComponents: Component[] = [];
-    let declaredComponents: Partial<Component>[] = [];
+    const { stdout, stderr, exitCode } = await exec.getExecOutput(EXECUTABLE, args, options);
+    const summary = stdout;
+    let details = stderr;
 
-    const comps = getComponents(scannerResults);
-
-    // get declared components
-    try {
-      const sbom = await parseSBOM(inputs.SBOM_FILEPATH);
-      declaredComponents = sbom.components || [];
-    } catch (e) {
-      core.info(`Warning on policy check: ${this.checkName}. SBOM file could not be parsed (${inputs.SBOM_FILEPATH})`);
+    if (!SCANOSS_SETTINGS) {
+      core.warning('Undeclared policy is being used with SCANOSS settings disabled');
     }
 
-    comps.forEach(c => {
-      if (!declaredComponents.some(component => component.purl === c.purl)) {
-        nonDeclaredComponents.push(c);
-      }
-    });
-
-    const summary = this.getSummary(nonDeclaredComponents);
-    let details = this.getDetails(nonDeclaredComponents);
-
-    if (details) {
-      const { id } = await this.uploadArtifact(details);
-      if (id) details = await this.concatPolicyArtifactURLToPolicyCheck(details, id);
+    if (exitCode === 1) {
+      await this.success('### :white_check_mark: Policy Pass \n #### Not undeclared components were found', undefined);
+      return;
     }
 
-    if (nonDeclaredComponents.length === 0) {
-      return this.success(summary, details);
-    } else {
-      return this.reject(summary, details);
-    }
-  }
+    const { id } = await this.uploadArtifact(details);
+    core.debug(`Undeclared Artifact ID: ${id}`);
+    if (id) details = await this.concatPolicyArtifactURLToPolicyCheck(details, id);
 
-  private getSummary(components: Component[]): string {
-    return components.length === 0
-      ? '### :white_check_mark: Policy Pass \n #### Not undeclared components were found'
-      : `### :x: Policy Fail \n #### ${components.length} undeclared component(s) were found. \n See details for more information.`;
-  }
-
-  private getDetails(components: Component[]): string | undefined {
-    if (components.length === 0) return undefined;
-
-    const headers = ['Component', 'Version', 'License'];
-    const rows: string[][] = [];
-
-    components.forEach(component => {
-      const licenses = component.licenses.map(l => l.spdxid).join(' - ');
-      rows.push([component.purl, component.version, licenses]);
-    });
-
-    const snippet = JSON.stringify(
-      components.map(({ purl }) => ({ purl })),
-      null,
-      4
-    );
-
-    let content = `### Undeclared components \n ${generateTable(headers, rows)}`;
-    content += `#### Add the following snippet into your \`sbom.json\` file \n \`\`\`json \n ${snippet} \n \`\`\``;
-
-    return content;
+    return this.reject(summary, details);
   }
 
   artifactPolicyFileName(): string {

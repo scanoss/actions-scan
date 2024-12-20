@@ -14,7 +14,7 @@ permissions:
 jobs:
   lint:
     name: Lint Codebase
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -45,3 +45,5 @@ jobs:
           VALIDATE_JSCPD: false
           VALIDATE_MARKDOWN: false
           VALIDATE_NATURAL_LANGUAGE: false
+          SUPPRESS_FILE_TYPE_WARN: true
+          VALIDATE_JSON: false

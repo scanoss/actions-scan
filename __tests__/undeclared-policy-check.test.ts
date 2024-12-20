@@ -1,9 +1,15 @@
 import { CONCLUSION, PolicyCheck } from '../src/policies/policy-check';
-import { ScannerResults } from '../src/services/result.interfaces';
-import { resultsMock } from './results.mock';
 import { UndeclaredPolicyCheck } from '../src/policies/undeclared-policy-check';
-import * as sbomUtils from '../src/utils/sbom.utils';
-import { sbomMock } from './sbom.mock';
+import path from 'path';
+
+jest.mock('../src/app.input', () => ({
+  ...jest.requireActual('../src/app.input'),
+  REPO_DIR: '',
+  OUTPUT_FILEPATH: 'results.json',
+  COPYLEFT_LICENSE_EXCLUDE: '',
+  COPYLEFT_LICENSE_EXPLICIT: '',
+  COPYLEFT_LICENSE_INCLUDE: ''
+}));
 
 // Mock the @actions/github module
 jest.mock('@actions/github', () => ({
@@ -23,8 +29,8 @@ jest.mock('@actions/github', () => ({
 }));
 
 describe('UndeclaredPolicyCheck', () => {
-  let scannerResults: ScannerResults;
   let undeclaredPolicyCheck: UndeclaredPolicyCheck;
+  const appInput = jest.requireMock('../src/app.input');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,30 +40,32 @@ describe('UndeclaredPolicyCheck', () => {
     jest.spyOn(PolicyCheck.prototype, 'initStatus').mockImplementation();
     jest.spyOn(UndeclaredPolicyCheck.prototype, 'updateCheck').mockImplementation();
 
-    scannerResults = JSON.parse(resultsMock[3].content);
-
     undeclaredPolicyCheck = new UndeclaredPolicyCheck();
-  });
+  }, 30000);
 
   it('should pass the policy check when undeclared components are not found', async () => {
-    jest.spyOn(sbomUtils, 'parseSBOM').mockImplementation(async () => Promise.resolve(sbomMock[1]));
+    const TEST_DIR = __dirname;
+    const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
+    const TEST_RESULTS_FILE = 'empty-results.json';
 
-    await undeclaredPolicyCheck.run(scannerResults);
+    // Set the required environment variables
+    appInput.REPO_DIR = TEST_REPO_DIR;
+    appInput.OUTPUT_FILEPATH = TEST_RESULTS_FILE;
+
+    await undeclaredPolicyCheck.run();
     expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Success);
-  });
+  }, 30000);
 
   it('should fail the policy check when undeclared components are found', async () => {
-    jest.spyOn(sbomUtils, 'parseSBOM').mockImplementation(async () => Promise.resolve(sbomMock[0]));
+    const TEST_DIR = __dirname;
+    const TEST_REPO_DIR = path.join(TEST_DIR, 'data');
+    const TEST_RESULTS_FILE = 'results.json';
 
-    await undeclaredPolicyCheck.run(scannerResults);
-    expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
-  });
+    // Set the required environment variables
+    appInput.REPO_DIR = TEST_REPO_DIR;
+    appInput.OUTPUT_FILEPATH = TEST_RESULTS_FILE;
 
-  it('should exceeded the max limit', async () => {
-    jest.spyOn(sbomUtils, 'parseSBOM').mockImplementation(async () => Promise.resolve(sbomMock[0]));
-    scannerResults = JSON.parse(resultsMock[6].content);
-    await undeclaredPolicyCheck.run(scannerResults);
-    // Neutral = Failure on test environment
+    await undeclaredPolicyCheck.run();
     expect(undeclaredPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
-  });
+  }, 30000);
 });

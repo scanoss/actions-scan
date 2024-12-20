@@ -25,9 +25,6 @@ import * as core from '@actions/core';
 
 export const POLICIES = core.getInput('policies');
 export const POLICIES_HALT_ON_FAILURE = core.getInput('policies.halt_on_failure') === 'true';
-export const SBOM_ENABLED = core.getInput('sbom.enabled') === 'true';
-export const SBOM_FILEPATH = core.getInput('sbom.filepath');
-export const SBOM_TYPE = core.getInput('sbom.type');
 export const DEPENDENCIES_ENABLED = core.getInput('dependencies.enabled') === 'true';
 export const DEPENDENCIES_SCOPE = core.getInput('dependencies.scope');
 export const DEPENDENCY_SCOPE_EXCLUDE = core.getInput('dependencies.scope.exclude');
@@ -40,4 +37,9 @@ export const COPYLEFT_LICENSE_INCLUDE = core.getInput('licenses.copyleft.include
 export const COPYLEFT_LICENSE_EXCLUDE = core.getInput('licenses.copyleft.exclude');
 export const COPYLEFT_LICENSE_EXPLICIT = core.getInput('licenses.copyleft.explicit');
 export const REPO_DIR = process.env.GITHUB_WORKSPACE as string;
-export const RUNTIME_CONTAINER = core.getInput('runtimeContainer') || 'ghcr.io/scanoss/scanoss-py:v1.15.0';
+export const RUNTIME_CONTAINER = core.getInput('runtimeContainer') || 'ghcr.io/scanoss/scanoss-py:v1.19.0';
+export const SKIP_SNIPPETS = core.getInput('skipSnippets') === 'true';
+export const SCAN_FILES = core.getInput('scanFiles') === 'true';
+export const SCANOSS_SETTINGS = core.getInput('scanossSettings') === 'true';
+export const SETTINGS_FILE_PATH = core.getInput('settingsFilepath') || 'scanoss.json';
+export const EXECUTABLE = 'docker';
