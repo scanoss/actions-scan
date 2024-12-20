@@ -59,7 +59,7 @@ export class UndeclaredPolicyCheck extends PolicyCheck {
     let details = stderr;
 
     if (!SCANOSS_SETTINGS) {
-      core.warning('SCANOSS settings is not enabled');
+      core.warning('Undeclared policy is being used with SCANOSS settings disabled');
     }
 
     if (exitCode === 1) {

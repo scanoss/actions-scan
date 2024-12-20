@@ -15,6 +15,42 @@ vulnerabilities and license compliance with configurable policies.
 
 </div>
 
+## Breaking change v1.0.1
+
+- Default runtime container updated to `ghcr.io/scanoss/scanoss-py:v1.19.0`
+- Removed parameters:
+   - `sbom.enabled`
+   - `sbom.filepath`
+   - `sbom.type`
+
+### Converting from sbom.json to scanoss.json
+The SBOM configuration format has changed and the file name must be updated from **sbom.json** to **scanoss.json**. Here's how to convert your existing configuration:
+
+Old format (sbom.json):
+```json
+{
+  "components": [
+    {
+      "purl": "pkg:github/scanoss/scanner.c"
+    }
+  ]
+}
+```
+
+New format (scanoss.json):
+```json
+{
+  "bom": {
+    "include": [
+      {
+        "purl": "pkg:github/scanoss/scanner.c"
+      }
+    ]
+  }
+}
+```
+
+
 ## Usage
 
 To begin using this action, you'll need to set up a basic GitHub workflow and define a job within it:
