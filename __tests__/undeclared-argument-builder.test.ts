@@ -19,7 +19,6 @@ describe('UndeclaredArgumentBuilder', () => {
     appInput.REPO_DIR = 'repodir';
     appInput.OUTPUT_FILEPATH = 'results.json';
     appInput.SCANOSS_SETTINGS = false;
-    appInput.SBOM_ENABLED = true;
     const builder = new UndeclaredArgumentBuilder();
     const cmd = await builder.build();
     expect(cmd).toEqual([
@@ -32,9 +31,7 @@ describe('UndeclaredArgumentBuilder', () => {
       '--input',
       'results.json',
       '--format',
-      'md',
-      '--sbom-format',
-      'legacy'
+      'md'
     ]);
   });
 

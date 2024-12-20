@@ -36,8 +36,7 @@ export class UndeclaredArgumentBuilder extends ArgumentBuilder {
       '--input',
       OUTPUT_FILEPATH,
       '--format',
-      'md',
-      ...(!SCANOSS_SETTINGS ? ['--sbom-format', 'legacy'] : []) // Sets sbom format output to legacy if SCANOSS_SETTINGS is not true
+      'md'
     ];
   }
 }
