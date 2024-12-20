@@ -85,7 +85,7 @@ export interface Options {
   inputFilepath: string;
 
   /**
-   * Runtime container to perform scan. Default [ghcr.io/scanoss/scanoss-py:v1.18.0]
+   * Runtime container to perform scan. Default [ghcr.io/scanoss/scanoss-py:v1.19.0]
    */
   runtimeContainer: string;
 

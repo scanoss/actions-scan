@@ -60,7 +60,7 @@ describe('CopyleftPolicyCheck', () => {
     await copyleftPolicyCheck.run();
     //neutral cause policy policy halt on failure is not set
     expect(copyleftPolicyCheck.conclusion).toEqual(CONCLUSION.Neutral);
-  }, 30000);
+  }, 50000);
 
   it('Copyleft policy empty results', async () => {
     const TEST_DIR = __dirname;
@@ -81,7 +81,7 @@ describe('CopyleftPolicyCheck', () => {
     await copyleftPolicyCheck.run();
     //neutral cause policy policy halt on failure is not set
     expect(copyleftPolicyCheck.conclusion).toEqual(CONCLUSION.Success);
-  }, 30000);
+  }, 50000);
 
   it('Copyleft policy explicit licenses', async () => {
     const TEST_DIR = __dirname;

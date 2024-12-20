@@ -22,7 +22,7 @@
  */
 
 import { ArgumentBuilder } from './argument-builder';
-import { OUTPUT_FILEPATH, REPO_DIR, RUNTIME_CONTAINER, SCANOSS_SETTINGS } from '../../app.input';
+import { OUTPUT_FILEPATH, REPO_DIR, RUNTIME_CONTAINER } from '../../app.input';
 
 export class UndeclaredArgumentBuilder extends ArgumentBuilder {
   async build(): Promise<string[]> {
