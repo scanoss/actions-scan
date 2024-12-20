@@ -81,7 +81,7 @@ jobs:
 
       - name: Run SCANOSS Code Scan
         id: scanoss-code-scan-step
-        uses: scanoss/code-scan-action@v0
+        uses: scanoss/code-scan-action@v1
 ```
 
 For example workflow runs, check out our
@@ -164,7 +164,7 @@ jobs:
 
       - name: Run SCANOSS Code Scan
         id: scanoss-code-scan-step
-        uses: scanoss/code-scan-action@v0
+        uses: scanoss/code-scan-action@v1
         with:
           policies: copyleft, undeclared 
           dependencies.enabled: true
